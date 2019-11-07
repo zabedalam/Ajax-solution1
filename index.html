@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Hello, world!</title>
+
+    <style>
+        .card {
+            border: 1px solid darkgray;
+            text-align: center;
+            min-height: 50px;
+            line-height: 50px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <input type="text" id="search" placeholder="searchMe!">
+    <input type="button" class="btn btn-danger" onclick="filterStuff()">
+
+    <ul id="songNames">
+
+    </ul>
+
+    <div class="container">
+        <div class="row" id="cardContainer">
+
+        </div>
+
+        <div class="row" id="details">
+
+        </div>
+    </div>
+
+    <script>
+        function getNormalFunction() {
+            fetch("https://deezerdevs-deezer.p.rapidapi.com/search?q=eminem", {
+                    "method": "GET",
+                    "headers": {
+                        "x-rapidapi-host": "deezerdevs-deezer.p.rapidapi.com",
+                        "x-rapidapi-key": "575de39080mshf1f9cab8127c63fp1bcad8jsn113d9f3f814b"
+                    }
+                })
+                .then(function (response) {
+                    return response.json()
+                })
+                .then(function (json) {
+                    console.log(json)
+                })
+                .catch(function (err) {
+                    console.log(err);
+                });
+        }
+
+        window.onload = () => {
+            loadArrow("eminem")
+
+
+            // loadArrow("metallica")
+            // loadArrow("einaudi")
+        }
+
+        filterStuff = () => {
+            let filterSearch = document.querySelector("#search").value
+            let cardContainer = document.querySelector("#cardContainer")
+            cardContainer.innerHTML = "";
+
+            let filteredSongs = loadedSongs.filter(song => song.title.includes(filterSearch))
+
+            filteredSongs.forEach(currentSong => {
+                cardContainer.innerHTML += `
+                <div class="col-sm-3 col-md-2 card" onclick="detailMe('${currentSong.id})'">
+                    <img src="${currentSong.album.cover}">
+                    <span> ${currentSong.title} </span>
+                </div>
+            `
+            })
+        }
+
+        let loadedSongs = []
+
+        detailMe = (id) => {
+            console.log(id)
+            let details = document.querySelector("#details")
+
+            var selectedSong = loadedSongs.find(x => x.id == id)
+
+            details.innerHTML = `
+            <div> ${selectedSong.title} - ${selectedSong.duration}
+                <img src="${selectedSong.album.cover}" >
+            </div>
+        `
+        }
+
+        loadArrow = (artist) => {
+            //arrow function
+            fetch("https://deezerdevs-deezer.p.rapidapi.com/search?q=" + artist, {
+                    "method": "GET",
+                    "headers": {
+                        "x-rapidapi-host": "deezerdevs-deezer.p.rapidapi.com",
+                        "x-rapidapi-key": "575de39080mshf1f9cab8127c63fp1bcad8jsn113d9f3f814b"
+                    }
+                })
+                .then(response => response.json())
+                .then(json => {
+                    var cardContainer = document.querySelector("#cardContainer")
+                    var songName = document.querySelector("#songNames")
+
+                    loadedSongs = json.data;
+
+                    let duration = 0;
+                    loadedSongs.forEach(song => {
+                        duration += song.duration
+                    })
+
+                    console.log(loadedSongs.reduce((accumulator, currentItem) => accumulator + parseInt(
+                        currentItem.duration), 0))
+
+                    var indexedSongs = loadedSongs.reduce((accumulator, song) => {
+                        accumulator[song.id] = song;
+                        return accumulator
+                    }, {})
+                    console.log(indexedSongs)
+
+                    // console.log(loadedSongs
+                    //         .map(x => parseInt(x.duration))  // extracting only the duration
+                    //         .reduce((acc, currentSong) => acc + currentSong)) //summing the duration
+
+                    console.log(duration)
+
+                    // let albums = loadedSongs.map(song => song.album)
+                    // console.log(albums)
+
+                    // var myHtml = loadedSongs.map(song => `
+                    //     <h1>${song.title}</h1>
+                    //     <p>${song.album.title} - ${song.album.year}</p>
+                    // `)
+
+                    // myHtml.forEach(html => cardContainer.innerHTML += html)
+
+                    // loadedSongs.forEach(song => {
+                    //     cardContainer.innerHTML += `
+                    //             <h1>${song.title}</h1>
+                    //             <p>${song.album.title} - ${song.album.year}</p>
+                    //         `
+                    // })
+
+                    // console.log("BEFORE FILTER: ", json.data)
+
+                    // let filteredSongs = json.data.filter(song => song.id == "790041102")
+
+                    // let boringStuff = [];
+                    // for (var i = 0; i < json.data.length; i ++){
+                    //     if (json.data[i].duration > 600)
+                    //         boringStuff.push(json.data[i])
+                    // }
+
+                    // console.log(boringStuff)
+                    // console.log("AFTER FILTER: ", filteredSongs)
+
+                    //NAVIGATION
+                    loadedSongs.forEach(currentSong => {
+                        cardContainer.innerHTML += `
+                     <div class="col-sm-3 col-md-2 card" >
+                        <a href="details.html?songId=${currentSong.id}">
+                         <img src="${currentSong.album.cover}">
+                         </a>
+                       <span> ${currentSong.title} </span>
+                     </div>
+                 `
+                    })
+
+                    //MODAL
+                    // loadedSongs.forEach(currentSong => {
+                    //     cardContainer.innerHTML += `
+                    //          <div class="col-sm-3 col-md-2 card" onClick="openModalWithID('${currentSong.id}')">
+                    //              <img src="${currentSong.album.cover}">
+                    //            <span> ${currentSong.title} </span>
+                    //          </div>
+                    //      `
+                    // })
+
+
+
+                    // json.data.forEach(currentSong => {
+                    //     var div = document.createElement("div")
+                    //     div.className ="col-sm-3 col-md-2"
+                    //     div.innerText = currentSong.title
+                    //     div.addEventListener("click", () => {
+                    //         console.log(currentSong)
+                    //     })
+                    //     cardContainer.appendChild(div)
+                    // })
+
+                    // return;
+                    // let currentSong = undefined
+                    return;
+                    for (var i = 0; i < json.data.length; i++) {
+                        currentSong = json.data[i]
+                        var div = document.createElement("div")
+                        div.className = "col-sm-3 col-md-2"
+                        div.innerText = currentSong.title
+                        div.addEventListener("click", () => {
+                            console.log(currentSong) //always get the last value!!!
+                        })
+                        cardContainer.appendChild(div)
+                        // var currentSong = json.data[i]
+                        // console.log(currentSong)
+
+                        // cardContainer.innerHTML += `
+                        //     <div class="col-sm-3 col-md-2 card">
+                        //         <img src="${currentSong.album.cover}">
+                        //         <span> ${currentSong.title} </span>
+                        //     </div>
+                        // `
+
+                        //songName.innerHTML += `<li>${currentSong.title}</li>`
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
+        openModalWithID = (id) => {
+            let modalBody = document.querySelector(".modal-body")
+
+            let song = loadedSongs.find(x => x.id == id)
+
+            modalBody.innerHTML = `
+            <img src="${song.album.cover_xl}" style="width:100%" >
+        `
+
+            $('#myModal').modal()
+        }
+
+        function createCards() {
+            var cardContainer = document.querySelector("#cardContainer")
+
+            for (var i = 0; i < 20; i++) {
+                // var div = document.createElement("div")
+                // div.className ="col-sm-3 col-md-2"
+                // div.innerText = i
+                // cardContainer.appendChild(div)
+
+                cardContainer.innerHTML += `
+                <div class="col-sm-3 col-md-2 card">
+                    ${i}
+                </div>
+            `
+            }
+        }
+    </script>
+
+    <div class="modal" id="myModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
